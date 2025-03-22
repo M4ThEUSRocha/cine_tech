@@ -1,0 +1,100 @@
+/* Deixar o rodapé fixo no final da página */
+html, body {
+    height: 100%; /* Altura total da tela */
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    flex: 1; /* Faz o conteúdo ocupar o espaço disponível */
+}
+
+.footer {
+    margin-top: auto; /* Faz o rodapé ser empurrado para o final */
+}
+
+/* Estilizar títulos */
+h1 {
+    color: #343a40;
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* Estilizar cards */
+.card {
+    border: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); /* Sombra mais suave */
+}
+
+/* Melhorar a responsividade da imagem nos cards */
+.card-img-top {
+    width: 100%;
+    height: 250px;
+    object-fit: cover; /* Mantém o aspecto sem distorcer */
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    transition: transform 0.3s ease;
+}
+
+.card-img-top:hover {
+    transform: scale(1.05); /* Efeito suave ao passar o mouse */
+}
+
+/* Ajuste de altura da imagem em telas menores */
+@media (max-width: 768px) {
+    .card-img-top {
+        height: 200px;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-img-top {
+        height: 150px;
+    }
+}
+
+/* Botões arredondados e efeitos */
+.btn-primary, .btn-success, .btn-danger, .btn-info {
+    border-radius: 25px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #1c7ed6;
+}
+
+.btn-danger:hover {
+    background-color: #f03e3e;
+}
+
+.btn-info:hover {
+    background-color: #1098ad;
+}
+
+.btn-success:hover {
+    background-color: #37b24d;
+}
+
+/* Responsividade geral para o conteúdo */
+@media (max-width: 992px) {
+    h1 {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+}
