@@ -16,15 +16,13 @@ Dividido em área administrativa (gestão de filmes e gêneros) e usuário final
 
 
 
+![tela adm](https://github.com/user-attachments/assets/63ad036c-e199-4a06-9996-03fa8301375e)
 
 
 
 
 
 
-
-
-![pagina admistrativa](https://github.com/user-attachments/assets/bb5a124c-b5d7-4aa9-86f8-a920c9fa86fa)
 
 
 

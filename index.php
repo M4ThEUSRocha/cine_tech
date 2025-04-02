@@ -2,28 +2,40 @@
 
 <h1 class="text-center mb-4">🎬 Lista de Filmes</h1>
 
-<div class="d-flex justify-content-between mb-4">
-    <!-- Campo de pesquisa -->
-    <input type="text" id="pesquisa" class="form-control me-2" placeholder="🔎 Buscar filme..." oninput="filtrarFilmes()">
-    
-    <!-- Filtro por gênero -->
-    <select id="filtro-genero" class="form-select me-2" onchange="filtrarFilmes()">
-        <option value="">Todos os Gêneros</option>
-    </select>
+<div class="row mb-5 d-flex justify-content-center">
+    <div class="col-md-5 mb-3 mb-md-0">
+        <!-- Campo de pesquisa -->
+        <input type="text" id="pesquisa" class="form-control" placeholder="🔎 Buscar filme..." oninput="filtrarFilmes()">
+    </div>
+    <div class="col-md-5">
+        <!-- Filtro por gênero -->
+        <select id="filtro-genero" class="form-select" onchange="filtrarFilmes()">
+            <option value="">Todos os Gêneros</option>
+        </select>
+    </div>
 </div>
 
-<!-- Adicionar CSS para garantir a responsividade da imagem -->
 <style>
-    /* Ajustes para a responsividade da imagem */
     .card-img-top {
-        width: 100%; /* A imagem ocupa toda a largura do card */
-        height: auto; /* A altura será ajustada automaticamente para manter a proporção */
-        object-fit: cover; /* Mantém a imagem coberta sem distorção */
-        max-height: 250px; /* Limita a altura máxima para não exagerar em telas grandes */
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        max-height: 250px;
+    }
+    #lista-filmes {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    .navbar-nav .nav-link {
+        font-size: 1.1rem;
+        font-weight: bold;
+        padding: 10px 15px;
     }
 </style>
 
-<div class="row" id="lista-filmes">
+<div class="row justify-content-center" id="lista-filmes">
     <!-- Os filmes serão carregados dinamicamente aqui -->
 </div>
 
@@ -39,6 +51,8 @@
                 <img id="detalhesCapa" src="" class="img-fluid mb-3" alt="Imagem do Filme">
                 <h5 id="detalhesTitulo"></h5>
                 <p id="detalhesSinopse"></p>
+                <p id="duracao"></p>
+                <p id="data_lancamento"></p>  
                 <a id="detalhesTrailer" href="#" target="_blank" class="btn btn-primary w-100">Assistir Trailer</a>
             </div>
         </div>
@@ -46,40 +60,35 @@
 </div>
 
 <script>
-    let filmes = []; // Array para armazenar os filmes carregados
+    let filmes = [];
 
     document.addEventListener('DOMContentLoaded', () => {
         carregarFilmes();
         carregarGeneros();
     });
 
-    // Carregar lista de filmes
     function carregarFilmes() {
         fetch('api.php?tipo=filme')
             .then(response => response.json())
             .then(data => {
                 filmes = data;
                 renderizarFilmes(filmes);
-
-                // Ativa o botão de busca após o carregamento dos filmes
-                document.getElementById('btn-buscar').disabled = false;
             })
             .catch(error => console.error('Erro ao carregar filmes:', error));
     }
 
-    // Renderizar filmes na tela
     function renderizarFilmes(lista) {
         let html = '';
         lista.forEach(filme => {
             html += `
-                <div class="col-md-4 mb-4" data-id="${filme.id}">
-                    <div class="card h-100 shadow-sm">
+                <div class="col-md-4 mb-4 d-flex justify-content-center" data-id="${filme.id}">
+                    <div class="card h-100 shadow-sm" style="width: 30rem;">
                         <img src="${filme.capa}" class="card-img-top" alt="${filme.titulo}">
                         <div class="card-body">
                             <h5 class="card-title">${filme.titulo}</h5>
                             <p class="card-text">${filme.sinopse}</p>
                             <a href="${filme.link}" target="_blank" class="btn btn-primary w-100">Assistir Trailer</a>
-                            <button class="btn btn-info w-100 mt-2" onclick="verDetalhes('${filme.titulo}', '${filme.sinopse}', '${filme.capa}', '${filme.link}')">Ver Detalhes</button>
+                            <button class="btn btn-info w-100 mt-2" onclick="verDetalhes('${filme.titulo}', '${filme.sinopse}', '${filme.capa}', '${filme.link}', '${filme.duracao}', '${filme.data_lancamento}')">Ver Detalhes</button>
                             <button class="btn btn-danger w-100 mt-2" onclick="excluirFilme(${filme.id})">Excluir</button>
                         </div>
                     </div>
@@ -89,29 +98,40 @@
         document.getElementById('lista-filmes').innerHTML = html;
     }
 
-    // Excluir filme
     function excluirFilme(id) {
-        if (!confirm('Tem certeza que deseja excluir este filme?')) return;
+    if (!confirm('Tem certeza que deseja excluir este filme?')) return;
+    
+    // Seleciona o botão de exclusão e adiciona o spinner que e a bolinha de carregamento
+    const botao = document.querySelector(`div[data-id="${id}"] .btn-danger`);
+    botao.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Excluindo...';
+    botao.disabled = true;
 
-        fetch(`api.php?id=${id}`, {
-            method: 'DELETE'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                document.querySelector(`div[data-id="${id}"]`).remove(); // Remove o filme da lista
-                alert(data.message);
-            } else {
-                alert(`Erro ao excluir filme: ${data.message}`);
-            }
-        })
-        .catch(error => {
-            console.error('Erro ao excluir filme:', error);
-            alert('Erro ao excluir o filme.');
-        });
-    }
+    fetch('api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `id=${id}&_method=DELETE&tipo=filme`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert(data.message);
+            location.reload(); // Recarrega a página após exclusão bem-sucedida
+        } else {
+            alert(`Erro ao excluir filme: ${data.message}`);
+            botao.innerHTML = 'Excluir'; // Restaura o botão
+            botao.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao excluir filme:', error);
+        alert('Erro ao excluir o filme.');
+        botao.innerHTML = 'Excluir'; // Restaura o botão
+        botao.disabled = false;
+    });
+}
 
-    // Carregar lista de gêneros
+
+
     function carregarGeneros() {
         fetch('api.php?tipo=genero')
             .then(response => response.json())
@@ -127,7 +147,6 @@
             .catch(error => console.error('Erro ao carregar gêneros:', error));
     }
 
-    // Filtrar filmes por nome e gênero
     function filtrarFilmes() {
         if (filmes.length === 0) {
             console.warn('Nenhum filme carregado ainda.');
@@ -146,12 +165,13 @@
         renderizarFilmes(filmesFiltrados);
     }
 
-    // Exibir detalhes no modal
-    function verDetalhes(titulo, sinopse, capa, trailer) {
+    function verDetalhes(titulo, sinopse, capa, trailer, duracao, data_lancamento) {
         document.getElementById('detalhesTitulo').innerText = titulo;
         document.getElementById('detalhesSinopse').innerText = sinopse;
         document.getElementById('detalhesCapa').src = capa;
         document.getElementById('detalhesTrailer').href = trailer;
+        document.getElementById('duracao').innerText = `Duração: ${duracao} horas`;
+        document.getElementById('data_lancamento').innerText = `Lançamento: ${data_lancamento}`;
 
         const modal = new bootstrap.Modal(document.getElementById('detalhesFilmeModal'));
         modal.show();

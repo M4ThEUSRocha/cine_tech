@@ -19,6 +19,14 @@
             </select>
         </div>
         <div class="mb-3">
+            <label for="data_lancamento" class="form-label">Data de Lançamento</label>
+            <input type="date" class="form-control" id="data_lancamento" name="data_lancamento" required>
+        </div>
+        <div class="mb-3">
+            <label for="duracao" class="form-label">Duração (horas)</label>
+            <input type="number" class="form-control" id="duracao" name="duracao" required min="1">
+        </div>
+        <div class="mb-3">
             <label for="imagem" class="form-label">Imagem</label>
             <input type="file" class="form-control" id="imagem" name="imagem" required accept=".jpg, .jpeg, .png">
             <small class="text-muted">Formatos permitidos: .jpg, .jpeg, .png</small>
@@ -36,12 +44,8 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Carregar gêneros dinamicamente
         fetch('api.php?tipo=genero')
-            .then(response => {
-                if (!response.ok) throw new Error('Erro ao carregar gêneros');
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
                 let options = '<option value="">Selecione um gênero</option>';
                 data.forEach(genero => {
@@ -54,13 +58,11 @@
                 alert('Erro ao carregar os gêneros.');
             });
 
-        // Validação de URL do trailer
         function validarURL(url) {
             const regex = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9._-]+\.[a-zA-Z]{2,})(\/.*)?$/;
             return regex.test(url);
         }
 
-        // Salvar filme
         document.getElementById('form-filme').addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -79,9 +81,7 @@
                 }
             }
 
-            // Exibir spinner
-            const spinner = document.getElementById('spinner');
-            spinner.classList.remove('d-none');
+            document.getElementById('spinner').classList.remove('d-none');
 
             const formData = new FormData(e.target);
 
@@ -89,14 +89,9 @@
                 method: 'POST',
                 body: formData
             })
-            .then(response => {
-                if (!response.ok) throw new Error('Erro ao salvar o filme');
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
                 alert(data.message);
-
-                // Redireciona para a lista após o sucesso
                 window.location.href = 'index.php';
             })
             .catch(error => {
@@ -104,8 +99,7 @@
                 alert('Erro ao salvar o filme.');
             })
             .finally(() => {
-                // Esconde o spinner após a conclusão
-                spinner.classList.add('d-none');
+                document.getElementById('spinner').classList.add('d-none');
             });
         });
     });

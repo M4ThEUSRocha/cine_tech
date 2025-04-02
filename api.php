@@ -23,6 +23,12 @@ if (isset($_GET['tipo']) && $_GET['tipo'] === 'filme') {
     while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
         // Corrigir o caminho da imagem para garantir que esteja correto
         $row['capa'] = !empty($row['capa']) ? 'uploads/' . $row['capa'] : 'uploads/default.png';
+        
+        // Formatar data de lançamento para dd/mm/aaaa
+        if (!empty($row['data_lancamento'])) {
+            $row['data_lancamento'] = date('d/m/Y', strtotime($row['data_lancamento']));
+        }
+
         $filmes[] = $row;
     }
 
@@ -51,6 +57,8 @@ if ($method === 'POST') {
         $sinopse = $_POST['descricao'] ?? '';
         $genero_id = $_POST['genero_id'] ?? '';
         $link = $_POST['trailer'] ?? '';
+        $data_lancamento = $_POST['data_lancamento'] ?? ''; 
+        $duracao = $_POST['duracao'] ?? '';  
 
         // Upload da imagem
         if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] === UPLOAD_ERR_OK) {
@@ -68,14 +76,16 @@ if ($method === 'POST') {
         }
 
         // Inserir filme no banco de dados
-        $stmt = $db->prepare("INSERT INTO filmes (titulo, sinopse, capa, link, genero_id) 
-                              VALUES (:titulo, :sinopse, :capa, :link, :genero_id)");
+        $stmt = $db->prepare("INSERT INTO filmes (titulo, sinopse, capa, link, genero_id, data_lancamento, duracao) 
+                              VALUES (:titulo, :sinopse, :capa, :link, :genero_id, :data_lancamento, :duracao)");
         $stmt->execute([
             ':titulo' => $titulo,
             ':sinopse' => $sinopse,
             ':capa' => $capa,
             ':link' => $link,
-            ':genero_id' => $genero_id
+            ':genero_id' => $genero_id,
+            ':data_lancamento' => $data_lancamento,
+            ':duracao' => $duracao
         ]);
 
         echo json_encode(['status' => 'success', 'message' => 'Filme salvo com sucesso!']);
@@ -87,8 +97,14 @@ if ($method === 'POST') {
 }
 
 // 👉 Excluir filme (método DELETE tratado via _method)
-if ($method === 'DELETE' && isset($_GET['id'])) {
-    $id = intval($_GET['id']); // Converte para número inteiro
+if ($method === 'DELETE') {
+    // Capturar o ID tanto de $_GET quanto de $_POST
+    $id = 0;
+    if (isset($_GET['id'])) {
+        $id = intval($_GET['id']);
+    } elseif (isset($_POST['id'])) {
+        $id = intval($_POST['id']);
+    }
 
     if ($id > 0) {
         // 🔥 Verifica se o filme existe e obtém a capa
