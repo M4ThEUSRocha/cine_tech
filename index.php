@@ -102,14 +102,14 @@
     if (!confirm('Tem certeza que deseja excluir este filme?')) return;
     
     // Seleciona o botão de exclusão e adiciona o spinner que e a bolinha de carregamento
-    const botao = document.querySelector(div[data-id="${id}"] .btn-danger);
+    const botao = document.querySelector(`div[data-id="${id}"] .btn-danger`);
     botao.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Excluindo...';
     botao.disabled = true;
 
     fetch('api.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: id=${id}&_method=DELETE&tipo=filme
+        body: `id=${id}&_method=DELETE&tipo=filme`
     })
     .then(response => response.json())
     .then(data => {
@@ -117,7 +117,7 @@
             alert(data.message);
             location.reload(); // Recarrega a página após exclusão bem-sucedida
         } else {
-            alert(Erro ao excluir filme: ${data.message});
+            alert(`Erro ao excluir filme: ${data.message}`);
             botao.innerHTML = 'Excluir'; // Restaura o botão
             botao.disabled = false;
         }
@@ -170,12 +170,12 @@
         document.getElementById('detalhesSinopse').innerText = sinopse;
         document.getElementById('detalhesCapa').src = capa;
         document.getElementById('detalhesTrailer').href = trailer;
-        document.getElementById('duracao').innerText = Duração: ${duracao} horas;
-        document.getElementById('data_lancamento').innerText = Lançamento: ${data_lancamento};
+        document.getElementById('duracao').innerText = `Duração: ${duracao} horas`;
+        document.getElementById('data_lancamento').innerText = `Lançamento: ${data_lancamento}`;
 
         const modal = new bootstrap.Modal(document.getElementById('detalhesFilmeModal'));
         modal.show();
     }
 </script>
 
-<?php include('views/footer.php'); ?>
+<?php include('views/footer.php'); ?>
