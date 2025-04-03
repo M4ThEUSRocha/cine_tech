@@ -8,32 +8,22 @@
         <input type="text" id="pesquisa" class="form-control" placeholder="🔎 Buscar filme..." oninput="filtrarFilmes()">
     </div>
     <div class="col-md-5">
-        <!-- Filtro por gênero -->
-        <select id="filtro-genero" class="form-select" onchange="filtrarFilmes()">
-            <option value="">Todos os Gêneros</option>
-        </select>
+        <!-- Filtro por gênero (Dropdown Responsivo) -->
+        <div class="dropdown w-100">
+            <button class="btn dropdown-toggle w-100" type="button" id="dropdownGenero" 
+                data-bs-toggle="dropdown" aria-expanded="false" 
+                style="background-color: #333; color: white; border: 1px solid #444;">
+                Todos os Gêneros
+            </button>
+            <ul class="dropdown-menu w-100" id="filtro-genero" 
+                style="background-color: #222; border: 1px solid #444;">
+                <li><a class="dropdown-item" href="#" data-value="" onclick="selecionarGenero(this)" style="color: white;">Todos os Gêneros</a></li>
+            </ul>
+        </div>
     </div>
 </div>
 
-<style>
-    .card-img-top {
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-        max-height: 250px;
-    }
-    #lista-filmes {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        margin-top: 20px;
-    }
-    .navbar-nav .nav-link {
-        font-size: 1.1rem;
-        font-weight: bold;
-        padding: 10px 15px;
-    }
-</style>
+<link rel="stylesheet" href="assets/css/styles.css">
 
 <div class="row justify-content-center" id="lista-filmes">
     <!-- Os filmes serão carregados dinamicamente aqui -->
@@ -99,52 +89,60 @@
     }
 
     function excluirFilme(id) {
-    if (!confirm('Tem certeza que deseja excluir este filme?')) return;
-    
-    // Seleciona o botão de exclusão e adiciona o spinner que e a bolinha de carregamento
-    const botao = document.querySelector(`div[data-id="${id}"] .btn-danger`);
-    botao.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Excluindo...';
-    botao.disabled = true;
+        if (!confirm('Tem certeza que deseja excluir este filme?')) return;
+        
+        const botao = document.querySelector(`div[data-id="${id}"] .btn-danger`);
+        botao.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Excluindo...';
+        botao.disabled = true;
 
-    fetch('api.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `id=${id}&_method=DELETE&tipo=filme`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            alert(data.message);
-            location.reload(); // Recarrega a página após exclusão bem-sucedida
-        } else {
-            alert(`Erro ao excluir filme: ${data.message}`);
-            botao.innerHTML = 'Excluir'; // Restaura o botão
+        fetch('api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `id=${id}&_method=DELETE&tipo=filme`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert(`Erro ao excluir filme: ${data.message}`);
+                botao.innerHTML = 'Excluir';
+                botao.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao excluir filme:', error);
+            alert('Erro ao excluir o filme.');
+            botao.innerHTML = 'Excluir';
             botao.disabled = false;
-        }
-    })
-    .catch(error => {
-        console.error('Erro ao excluir filme:', error);
-        alert('Erro ao excluir o filme.');
-        botao.innerHTML = 'Excluir'; // Restaura o botão
-        botao.disabled = false;
-    });
-}
-
-
+        });
+    }
 
     function carregarGeneros() {
         fetch('api.php?tipo=genero')
             .then(response => response.json())
             .then(data => {
-                const select = document.getElementById('filtro-genero');
+                const filtroGenero = document.getElementById('filtro-genero');
+
                 data.forEach(genero => {
-                    const option = document.createElement('option');
-                    option.value = genero.nome.toLowerCase();
-                    option.innerText = genero.nome;
-                    select.appendChild(option);
+                    const li = document.createElement('li');
+                    li.innerHTML = `<a class="dropdown-item" href="#" data-value="${genero.nome.toLowerCase()}" onclick="selecionarGenero(this)" style="color: white;">${genero.nome}</a>`;
+                    filtroGenero.appendChild(li);
                 });
             })
             .catch(error => console.error('Erro ao carregar gêneros:', error));
+    }
+
+    function selecionarGenero(elemento) {
+        const botao = document.getElementById('dropdownGenero');
+        const valor = elemento.getAttribute('data-value');
+        const nome = elemento.innerText;
+
+        botao.innerText = nome; // Atualiza o texto do botão
+        botao.setAttribute('data-value', valor); // Salva o valor do gênero
+
+        filtrarFilmes(); // Aciona a filtragem
     }
 
     function filtrarFilmes() {
@@ -154,7 +152,7 @@
         }
 
         const termoPesquisa = document.getElementById('pesquisa').value.toLowerCase();
-        const generoSelecionado = document.getElementById('filtro-genero').value;
+        const generoSelecionado = document.getElementById('dropdownGenero').getAttribute('data-value');
 
         const filmesFiltrados = filmes.filter(filme => {
             const correspondeNome = filme.titulo.toLowerCase().includes(termoPesquisa);

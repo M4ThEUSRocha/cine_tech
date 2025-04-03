@@ -86,6 +86,17 @@ h1 {
     background-color: #37b24d;
 }
 
+/* Estilizar o botão do dropdown de gênero */
+.btn-custom-dark {
+    background-color: #333; /* Preto mais claro */
+    color: white;
+    border: 1px solid #444;
+}
+
+.btn-custom-dark:hover {
+    background-color: #444;
+}
+
 /* Responsividade geral para o conteúdo */
 @media (max-width: 992px) {
     h1 {
